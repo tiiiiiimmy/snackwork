@@ -1,430 +1,208 @@
-# SnackSpot Auckland v2.0 - 开发规范文档
 
-## 1. 命名规范
+# SnackSpot Auckland v2.0 - 开发规范文档 (v1.1)
 
-### 1.1 前端命名规范
-
-#### 1.1.1 文件和目录命名
-
-- **组件文件**：`PascalCase.tsx`
-  ```typescript
-  // ✅ 正确
-  UserProfile.tsx
-  SnackCard.tsx
-  AddSnackForm.tsx
-  
-  // ❌ 错误
-  userProfile.tsx
-  snack-card.tsx
-  ```
-
-- **目录名**：`camelCase` 或 `kebab-case`
-  ```typescript
-  // ✅ 正确
-  src/components/userProfile/
-  src/components/snack-card/
-  src/hooks/
-  ```
-
-- **工具文件**：`camelCase.ts`
-  ```typescript
-  // ✅ 正确
-  formatDate.ts
-  validateEmail.ts
-  apiClient.ts
-  ```
-
-- **类型定义文件**：`camelCase.ts`
-  ```typescript
-  // ✅ 正确
-  user.ts
-  snack.ts
-  api.ts
-  ```
-
-- **常量文件**：`constants.ts` 或 `UPPER_CASE.ts`
-  ```typescript
-  // ✅ 正确
-  constants.ts
-  API_ENDPOINTS.ts
-  ```
-
-#### 1.1.2 变量和函数命名
-
-- **变量**：`camelCase`
-  ```typescript
-  // ✅ 正确
-  const userName = 'John';
-  const snackList = [];
-  const isLoading = true;
-  
-  // ❌ 错误
-  const user_name = 'John';
-  const SnackList = [];
-  ```
-
-- **函数**：`camelCase`
-  ```typescript
-  // ✅ 正确
-  function getUserProfile() {}
-  const handleSubmit = () => {};
-  const fetchSnacks = async () => {};
-  
-  // ❌ 错误
-  function GetUserProfile() {}
-  const handle_submit = () => {};
-  ```
-
-- **组件**：`PascalCase`
-  ```typescript
-  // ✅ 正确
-  function UserProfile() {}
-  const SnackCard = () => {};
-  
-  // ❌ 错误
-  function userProfile() {}
-  const snackCard = () => {};
-  ```
-
-- **常量**：`UPPER_SNAKE_CASE`
-  ```typescript
-  // ✅ 正确
-  const API_BASE_URL = 'https://api.example.com';
-  const MAX_FILE_SIZE = 5 * 1024 * 1024;
-  
-  // ❌ 错误
-  const apiBaseUrl = 'https://api.example.com';
-  const maxFileSize = 5 * 1024 * 1024;
-  ```
-
-- **私有变量/函数**：`_camelCase`（可选，TypeScript中不常用）
-  ```typescript
-  // ✅ 正确（如果使用）
-  const _internalHelper = () => {};
-  ```
-
-#### 1.1.3 类型和接口命名
-
-- **接口**：`PascalCase`，以 `I` 开头（可选）
-  ```typescript
-  // ✅ 正确
-  interface User {
-    id: string;
-    name: string;
-  }
-  
-  interface ISnackResponse {
-    id: string;
-    name: string;
-  }
-  ```
-
-- **类型别名**：`PascalCase`
-  ```typescript
-  // ✅ 正确
-  type UserId = string;
-  type SnackList = Snack[];
-  ```
-
-- **枚举**：`PascalCase`，枚举值 `UPPER_SNAKE_CASE`
-  ```typescript
-  // ✅ 正确
-  enum UserRole {
-    ADMIN = 'ADMIN',
-    USER = 'USER',
-  }
-  ```
-
-#### 1.1.4 CSS/SCSS命名
-
-- **类名**：`kebab-case`
-  ```scss
-  // ✅ 正确
-  .user-profile {}
-  .snack-card {}
-  .btn-primary {}
-  
-  // ❌ 错误
-  .userProfile {}
-  .snackCard {}
-  .btnPrimary {}
-  ```
-
-- **CSS变量**：`kebab-case`，以 `--` 开头
-  ```scss
-  // ✅ 正确
-  :root {
-    --primary-color: #007bff;
-    --font-size-base: 16px;
-  }
-  ```
-
-### 1.2 后端命名规范
-
-#### 1.2.1 文件和类命名
-
-- **类文件**：`PascalCase.cs`
-  ```csharp
-  // ✅ 正确
-  UserService.cs
-  SnackController.cs
-  ApplicationDbContext.cs
-  ```
-
-- **类名**：`PascalCase`
-  ```csharp
-  // ✅ 正确
-  public class UserService { }
-  public class SnackController : ControllerBase { }
-  ```
-
-- **接口**：`IPascalCase.cs`
-  ```csharp
-  // ✅ 正确
-  public interface IUserService { }
-  public interface IRecommendationService { }
-  ```
-
-#### 1.2.2 方法和属性命名
-
-- **方法**：`PascalCase`
-  ```csharp
-  // ✅ 正确
-  public async Task<User> GetUserAsync(Guid id) { }
-  public void CreateSnack(CreateSnackRequest request) { }
-  
-  // ❌ 错误
-  public async Task<User> getUserAsync(Guid id) { }
-  public void create_snack(CreateSnackRequest request) { }
-  ```
-
-- **属性**：`PascalCase`
-  ```csharp
-  // ✅ 正确
-  public string Name { get; set; }
-  public int TotalReviews { get; set; }
-  ```
-
-- **私有字段**：`_camelCase`
-  ```csharp
-  // ✅ 正确
-  private readonly ILogger _logger;
-  private readonly ApplicationDbContext _context;
-  ```
-
-- **参数和局部变量**：`camelCase`
-  ```csharp
-  // ✅ 正确
-  public async Task<User> GetUserAsync(Guid userId) { }
-  var snackList = await _context.Snacks.ToListAsync();
-  
-  // ❌ 错误
-  public async Task<User> GetUserAsync(Guid UserId) { }
-  var SnackList = await _context.Snacks.ToListAsync();
-  ```
-
-#### 1.2.3 DTO命名
-
-- **请求DTO**：`PascalCaseRequest.cs`
-  ```csharp
-  // ✅ 正确
-  CreateSnackRequest.cs
-  UpdateUserRequest.cs
-  LoginRequest.cs
-  ```
-
-- **响应DTO**：`PascalCaseResponse.cs`
-  ```csharp
-  // ✅ 正确
-  SnackResponse.cs
-  UserResponse.cs
-  ApiResponse.cs
-  ```
-
-#### 1.2.4 数据库命名
-
-- **表名**：`PascalCase`（复数形式）
-  ```sql
-  -- ✅ 正确
-  CREATE TABLE Users (...)
-  CREATE TABLE Snacks (...)
-  CREATE TABLE Reviews (...)
-  ```
-
-- **列名**：`PascalCase`
-  ```sql
-  -- ✅ 正确
-  Id, UserName, Email, CreatedAt
-  ```
+> 与《文件架构设计文档 V3.0》完全一致
+> **更新重点**：统一目录命名（frontend 子目录 camelCase）、引入 `queries/`（TanStack Query 模式）、明确 `pages vs features` 边界、PWA 缓存白名单/黑名单、后端 Core/Application/Infrastructure 分层、事件最终一致性+幂等、文件上传安全闭环、DB snake_case 强制。
 
 ---
 
-## 2. 代码组织原则
+## 0. 项目命名死规（必须遵守）
 
-### 2.1 前端代码组织
+### 0.1 根目录（Monorepo 顶层）
 
-#### 2.1.1 组件组织
+* 根目录一级子目录必须 **lowercase**（无连字符）
 
-**按功能模块组织**：
+  * ✅ `backend/`, `frontend/`, `docs/`, `plan/`, `scripts/`
+  * ❌ `front-end/`, `BackEnd/`
+
+### 0.2 前端子目录命名（统一 camelCase）
+
+* `frontend/src/` 下所有目录统一 **camelCase**
+
+  * ✅ `components/features/`, `components/common/`, `styles/mobile/`（mobile 本身可保留作为固定名）
+  * ✅ `components/snackCard/`（示例）
+  * ❌ `snack-card/`, `SnackCard/`（目录）
+
+> 注：文件命名仍按组件 PascalCase / 工具 camelCase 等规则执行。
+
+### 0.3 后端子目录命名（PascalCase）
+
+* `backend/SnackSpotAuckland.Api/` 下目录统一 **PascalCase**
+
+  * ✅ `Controllers/`, `Core/`, `Application/`, `Infrastructure/`
+
+---
+
+## 1. 命名规范
+
+### 1.1 前端命名规范（React + TypeScript）
+
+#### 1.1.1 文件命名
+
+* 组件文件：`PascalCase.tsx`
+
+  * ✅ `SnackCard.tsx`, `RecommendationFeed.tsx`
+* 样式文件：`ComponentName.module.scss`
+
+  * ✅ `SnackCard.module.scss`
+* 工具文件：`camelCase.ts`
+
+  * ✅ `formatDate.ts`, `buildGeoKey.ts`
+* Query 文件：`camelCase.ts`
+
+  * ✅ `feedQueries.ts`, `userQueries.ts`
+* 类型文件：`camelCase.ts`
+
+  * ✅ `snack.ts`, `user.ts`
+* 常量文件：统一 `constants.ts`（推荐），或 `UPPER_CASE.ts`（仅用于极少数全局常量）
+
+  * ✅ `constants.ts`
+
+#### 1.1.2 变量/函数/组件命名
+
+* 变量/函数：`camelCase`
+* React 组件：`PascalCase`
+* 常量：`UPPER_SNAKE_CASE`
+
+#### 1.1.3 类型/接口
+
+* interface/type：`PascalCase`
+* enum：`PascalCase`，成员 `UPPER_SNAKE_CASE`
+
+#### 1.1.4 SCSS 命名
+
+* CSS Modules 内 class 建议用 `camelCase`（因为通过 `styles.xxx` 引用更自然）
+
+  * ✅ `.likeButton {}` → `styles.likeButton`
+* 全局工具类（仅允许在 `styles/mobile/_utilities.scss`）：`kebab-case`
+
+  * ✅ `.tap-target`, `.hide-scrollbar`
+
+> 约束：组件样式必须在 `*.module.scss` 内；全局 styles 目录禁止出现业务组件 class（见 §4）。
+
+---
+
+### 1.2 后端命名规范（.NET 9 / C#）
+
+* 类/文件：`PascalCase.cs`
+* 接口：`I + PascalCase`
+* 方法/属性：`PascalCase`
+* 私有字段：`_camelCase`
+* 异步方法必须 `Async` 结尾
+
+---
+
+## 2. 代码组织原则（与 V3.0 对齐）
+
+### 2.1 前端组织原则（Strict）
+
+#### 2.1.1 目录结构约束（摘要）
+
 ```
-components/
-├── snack/          # 零食相关组件
-├── user/           # 用户相关组件
-├── review/         # 评价相关组件
-└── common/         # 通用组件
+frontend/src/
+  components/
+    common/
+    layout/
+    features/
+  pages/
+  queries/
+  services/
+  store/
+  hooks/
+  styles/
+  pwa/
 ```
 
-**组件文件结构**：
-```typescript
-// ComponentName.tsx
-import React from 'react';
-import styles from './ComponentName.module.scss';
+#### 2.1.2 `pages/` vs `components/features/` 边界（强制）
 
-interface ComponentNameProps {
-  // props定义
-}
+**`pages/`（路由容器）**
 
-export const ComponentName: React.FC<ComponentNameProps> = ({ ... }) => {
-  // 组件逻辑
-  return (
-    <div className={styles.container}>
-      {/* JSX */}
-    </div>
-  );
+* ✅ 允许：
+
+  * 路由入口、AuthGuard
+  * 调用 `queries/` 导出的 hooks（`useQuery/useInfiniteQuery`）
+  * 组装 Feature 组件、传 props
+* ❌ 禁止：
+
+  * 直接调用 `services/` 发请求
+  * 写复杂交互逻辑
+  * JSX 过长（**超过 50 行 JSX**：必须拆分到 features；布局型页面可例外但不得写业务交互）
+
+**`components/features/`（业务 UI + 局部交互）**
+
+* ✅ 允许：
+
+  * 展示数据、处理点击/滑动/展开收起
+  * 局部 UI 状态（open/close、selected tab）
+* ❌ 禁止：
+
+  * 直接发 API 请求（必须通过 props/回调触发，由 page/queries 处理）
+  * 在组件内部创建 React Query 实例
+
+#### 2.1.3 `hooks/` 的定位（强制）
+
+* `hooks/` 只放 **通用 UI hooks**（如 `useScroll`, `useWindowSize`）
+* ❌ 禁止在 `hooks/` 中直接调用 `useQuery` / `useInfiniteQuery`
+
+  * 所有数据请求必须在 `queries/` 层定义
+
+---
+
+### 2.2 数据层规范：`queries/`（TanStack Query 模式）
+
+#### 2.2.1 总原则
+
+* `services/`：**纯 HTTP**（axios 实例、拦截器、REST 方法封装）
+* `queries/`：**服务端状态**（Query Keys、缓存策略、失效策略、分页/无限滚动）
+* `pages/`：只消费 `queries/` 暴露的 hooks 并渲染
+
+#### 2.2.2 Query Key 规范（强制）
+
+* Key 必须由：`[domain, resource, ...params]` 组成
+* **禁止**在 queryKey 中放不稳定对象（避免引用导致 cache miss）
+
+  * ✅ 用字符串/数字/boolean
+  * ✅ 用 bucket 字符串 `geoKey`
+  * ❌ `queryKey: ['feed', { lat, lng }]`
+
+推荐：
+
+```ts
+// utils/buildGeoKey.ts
+export const buildGeoKey = (lat: number, lng: number) =>
+  `${lat.toFixed(2)}:${lng.toFixed(2)}`; // ~1.1km bucket
+```
+
+#### 2.2.3 Feed 无限滚动规范（示例）
+
+```ts
+// queries/feedQueries.ts
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { feedService } from '@/services/feedService';
+import { buildGeoKey } from '@/utils/buildGeoKey';
+
+export const useRecommendationFeedQuery = (lat: number, lng: number) => {
+  const geoKey = buildGeoKey(lat, lng);
+
+  return useInfiniteQuery({
+    queryKey: ['feed', 'reco', geoKey],
+    queryFn: ({ pageParam = 1 }) =>
+      feedService.getRecommendations({ page: pageParam, lat, lng }),
+    getNextPageParam: (lastPage) => lastPage.pagination?.nextPage ?? undefined,
+    staleTime: 15 * 60 * 1000, // 15 min
+  });
 };
 ```
 
-#### 2.1.2 Hooks组织
+#### 2.2.4 失效策略（Invalidation）约束
 
-**自定义Hooks**：
-```typescript
-// hooks/useSnacks.ts
-import { useState, useEffect } from 'react';
-import { snackService } from '../services/snackService';
+* 当用户发生 `Like/Review/Follow` 行为后：
 
-export const useSnacks = () => {
-  const [snacks, setSnacks] = useState<Snack[]>([]);
-  const [loading, setLoading] = useState(true);
+  * 必须 `invalidateQueries(['feed','reco', ...])`（至少该用户相关 feed）
+* `Follow` 行为需同时考虑：
 
-  useEffect(() => {
-    // 逻辑
-  }, []);
-
-  return { snacks, loading };
-};
-```
-
-#### 2.1.3 服务层组织
-
-**API服务**：
-```typescript
-// services/snackService.ts
-import { apiClient } from './api';
-
-export const snackService = {
-  async getSnacks(): Promise<Snack[]> {
-    const response = await apiClient.get<Snack[]>('/snacks');
-    return response.data;
-  },
-
-  async getSnackById(id: string): Promise<Snack> {
-    const response = await apiClient.get<Snack>(`/snacks/${id}`);
-    return response.data;
-  },
-};
-```
-
-### 2.2 后端代码组织
-
-#### 2.2.1 控制器组织
-
-**控制器结构**：
-```csharp
-// Controllers/V1/SnacksController.cs
-namespace SnackSpotAuckland.Api.Controllers.V1;
-
-[ApiController]
-[Route("api/v1/snacks")]
-[Authorize]
-public class SnacksController : ControllerBase
-{
-    private readonly ISnackService _snackService;
-    private readonly ILogger<SnacksController> _logger;
-
-    public SnacksController(
-        ISnackService snackService,
-        ILogger<SnacksController> logger)
-    {
-        _snackService = snackService;
-        _logger = logger;
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetSnacks([FromQuery] int page = 1)
-    {
-        // 实现
-    }
-}
-```
-
-#### 2.2.2 服务层组织
-
-**服务接口和实现**：
-```csharp
-// Services/Interfaces/ISnackService.cs
-public interface ISnackService
-{
-    Task<SnackResponse> GetSnackByIdAsync(Guid id);
-    Task<SnackResponse> CreateSnackAsync(CreateSnackRequest request);
-}
-
-// Services/SnackService.cs
-public class SnackService : ISnackService
-{
-    private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SnackService(ApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
-    // 实现
-}
-```
-
-#### 2.2.3 DTO组织
-
-**请求和响应分离**：
-```csharp
-// DTOs/Requests/CreateSnackRequest.cs
-public class CreateSnackRequest
-{
-    [Required]
-    [StringLength(100)]
-    public string Name { get; set; } = string.Empty;
-
-    [StringLength(500)]
-    public string? Description { get; set; }
-
-    [Required]
-    public Guid CategoryId { get; set; }
-
-    [Required]
-    public Guid StoreId { get; set; }
-}
-
-// DTOs/Responses/SnackResponse.cs
-public class SnackResponse
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public decimal AverageRating { get; set; }
-    public int TotalReviews { get; set; }
-}
-```
+  * 发起方：feed 失效
+  * 被关注方：profile/leaderboard（若缓存）失效
 
 ---
 
@@ -432,413 +210,176 @@ public class SnackResponse
 
 ### 3.1 前端导入顺序
 
-```typescript
-// 1. React和相关库
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+1. React / Router
+2. 第三方库
+3. 内部模块（services/queries/utils/components）
+4. types
+5. styles
 
-// 2. 第三方库
-import axios from 'axios';
-import { format } from 'date-fns';
+### 3.2 后端 using 顺序
 
-// 3. 内部服务/工具
-import { snackService } from '../services/snackService';
-import { formatDate } from '../utils/date';
-
-// 4. 类型定义
-import type { Snack, User } from '../types';
-
-// 5. 样式
-import styles from './ComponentName.module.scss';
-```
-
-### 3.2 后端using顺序
-
-```csharp
-// 1. System命名空间
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-// 2. Microsoft命名空间
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
-// 3. 第三方库
-using FluentValidation;
-using AutoMapper;
-
-// 4. 项目内部命名空间
-using SnackSpotAuckland.Api.Models;
-using SnackSpotAuckland.Api.Services;
-using SnackSpotAuckland.Api.DTOs;
-```
+1. System
+2. Microsoft
+3. 第三方库
+4. 项目内部命名空间
 
 ---
 
-## 4. 注释规范
+## 4. 样式规范（与 V3.0 对齐，Strict）
 
-### 4.1 前端注释
+### 4.1 全局 styles 目录职责
 
-#### 4.1.1 组件注释
+`frontend/src/styles/` 只允许：
 
-```typescript
-/**
- * 零食卡片组件
- * 
- * @component
- * @param {Snack} snack - 零食数据
- * @param {Function} onLike - 点赞回调函数
- * @param {boolean} showActions - 是否显示操作按钮
- * 
- * @example
- * <SnackCard 
- *   snack={snack} 
- *   onLike={handleLike}
- *   showActions={true}
- * />
- */
-export const SnackCard: React.FC<SnackCardProps> = ({ 
-  snack, 
-  onLike, 
-  showActions 
-}) => {
-  // 组件实现
-};
-```
+* 变量（colors/fonts）
+* mixins
+* mobile 基础设施（breakpoints/touch/safe-area）
+* **极少**工具类（utilities）
 
-#### 4.1.2 函数注释
+❌ 禁止：
 
-```typescript
-/**
- * 格式化日期为友好显示格式
- * 
- * @param {Date|string} date - 日期对象或日期字符串
- * @param {string} format - 格式化模板，默认为 'yyyy-MM-dd'
- * @returns {string} 格式化后的日期字符串
- * 
- * @example
- * formatDate(new Date(), 'yyyy-MM-dd') // '2025-01-27'
- */
-export const formatDate = (date: Date | string, format = 'yyyy-MM-dd'): string => {
-  // 实现
-};
-```
+* 在 `styles/mobile/` 下写任何具体组件 class（如 `.snackCard`, `.navBar`）
 
-### 4.2 后端注释
+### 4.2 组件样式归属权
 
-#### 4.2.1 类注释
-
-```csharp
-/// <summary>
-/// 零食服务，处理零食相关的业务逻辑
-/// </summary>
-public class SnackService : ISnackService
-{
-    // 实现
-}
-```
-
-#### 4.2.2 方法注释
-
-```csharp
-/// <summary>
-/// 根据ID获取零食详情
-/// </summary>
-/// <param name="id">零食ID</param>
-/// <returns>零食响应对象</returns>
-/// <exception cref="NotFoundException">当零食不存在时抛出</exception>
-public async Task<SnackResponse> GetSnackByIdAsync(Guid id)
-{
-    // 实现
-}
-```
-
-#### 4.2.3 复杂逻辑注释
-
-```csharp
-// 计算用户偏好分数
-// 1. 分类匹配度（40%权重）
-// 2. 标签匹配度（30%权重）
-// 3. 商店匹配度（20%权重）
-// 4. 评分匹配度（10%权重）
-private decimal CalculateUserPreferenceScore(Snack snack, Guid userId)
-{
-    // 实现
-}
-```
+* 所有组件样式必须在组件自身 `*.module.scss` 中完成（包括移动端适配）
+* 移动端适配通过 `@use '@/styles/mobile/touch'` 等 mixins/变量完成
 
 ---
 
-## 5. Git提交规范
+## 5. PWA 规范（安全优先）
 
-### 5.1 提交消息格式
+### 5.1 工具链
 
-使用 **Conventional Commits** 规范：
+* 使用 `vite-plugin-pwa`
+* 更新策略：`skipWaiting: true`, `clientsClaim: true`
+* 必须提供更新提示 UI（如 `pwa/reloadPrompt.tsx`）
 
-```
-<type>(<scope>): <subject>
+### 5.2 缓存白名单/黑名单（强制）
 
-<body>
+* ❌ 禁止缓存（任何涉及鉴权/隐私）：
 
-<footer>
-```
+  * `/api/auth/*`
+  * `/api/users/me`
+  * `/api/messages/*`
+  * 以及任何需要 `Authorization` 或 `credentials: include` 的请求
+* ✅ 允许缓存（公共数据）：
 
-### 5.2 提交类型
+  * `/api/categories`
+  * `/api/public/snacks`（或明确 public 前缀的接口）
 
-- `feat`: 新功能
-- `fix`: 修复bug
-- `docs`: 文档更新
-- `style`: 代码格式（不影响功能）
-- `refactor`: 重构
-- `perf`: 性能优化
-- `test`: 测试相关
-- `chore`: 构建/工具/依赖更新
-
-### 5.3 提交示例
-
-```bash
-# 新功能
-feat(frontend): add snack recommendation feed
-
-# 修复bug
-fix(backend): fix user authentication token refresh
-
-# 文档更新
-docs: update API documentation
-
-# 重构
-refactor(backend): extract recommendation service
-
-# 性能优化
-perf(frontend): optimize image lazy loading
-
-# 测试
-test(backend): add recommendation service tests
-
-# 构建/工具
-chore: update dependencies
-```
+> Service Worker 里必须显式忽略 `request.credentials === 'include'` 的请求。
 
 ---
 
-## 6. 代码质量规范
+## 6. 后端分层与事件规范（与 V3.0 对齐）
 
-### 6.1 TypeScript规范
+### 6.1 分层约束（强制）
 
-#### 6.1.1 类型定义
+* `Core/`：领域层（无外部依赖），包含 Entities/Interfaces/Events（POCO）
+* `Application/`：应用层（业务编排），包含 Services 与 EventHandlers
+* `Infrastructure/`：基础设施（Data/Caching/FileStorage），可依赖外部库/数据库/文件系统
+* `Controllers/`：仅做协议层（HTTP），不写业务规则
 
-```typescript
-// ✅ 正确：使用明确的类型
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+### 6.2 事件一致性与幂等（强制）
 
-function getUser(id: string): Promise<User> {
-  // 实现
-}
+* 模式：In-Process 发布订阅（MediatR 或同类）
+* 一致性：最终一致性（主业务成功即返回 200，副作用异步执行）
+* ❌ 禁止 fire-and-forget（例如 `Task.Run()` / 不 await 的后台任务）
+* ✅ Handler 必须：
 
-// ❌ 错误：使用any
-function getUser(id: any): any {
-  // 实现
-}
-```
+  * try-catch 捕获异常并记录日志
+  * 幂等：通过 `user_behavior_log`（或同类表）检查/唯一键防重复
 
-#### 6.1.2 可选属性
+建议 DB 级唯一约束（示例）：
 
-```typescript
-// ✅ 正确
-interface Snack {
-  id: string;
-  name: string;
-  description?: string;  // 可选属性
-}
-
-// ❌ 错误
-interface Snack {
-  id: string;
-  name: string;
-  description: string | undefined;
-}
-```
-
-### 6.2 C#规范
-
-#### 6.2.1 异步方法
-
-```csharp
-// ✅ 正确：异步方法以Async结尾
-public async Task<User> GetUserAsync(Guid id)
-{
-    return await _context.Users.FindAsync(id);
-}
-
-// ❌ 错误
-public async Task<User> GetUser(Guid id)
-{
-    return await _context.Users.FindAsync(id);
-}
-```
-
-#### 6.2.2 空值处理
-
-```csharp
-// ✅ 正确：使用null检查
-var user = await _context.Users.FindAsync(id);
-if (user == null)
-{
-    throw new NotFoundException($"User with id {id} not found");
-}
-
-// ❌ 错误：直接使用可能为null的对象
-var user = await _context.Users.FindAsync(id);
-var name = user.Name;  // 可能NullReferenceException
-```
+* `(user_id, target_id, behavior_type)` UNIQUE
 
 ---
 
-## 7. 错误处理规范
+## 7. 数据库命名规范（强制）
 
-### 7.1 前端错误处理
+> Linux 下 MySQL 表名大小写敏感，禁止 PascalCase 表名。
 
-```typescript
-// ✅ 正确：使用try-catch处理异步错误
-try {
-  const snacks = await snackService.getSnacks();
-  setSnacks(snacks);
-} catch (error) {
-  if (error instanceof AxiosError) {
-    console.error('API Error:', error.response?.data);
-    showToast('加载失败，请重试');
-  } else {
-    console.error('Unexpected error:', error);
-  }
-}
-```
+* 表名：`snake_case`（单数/复数任选，但项目内必须统一；推荐复数：`users`, `snacks`）
+* 列名：`snake_case`（如 `created_at`, `user_id`）
+* EF Core 映射必须显式指定：
 
-### 7.2 后端错误处理
-
-```csharp
-// ✅ 正确：使用统一的错误处理
-[HttpGet("{id}")]
-public async Task<IActionResult> GetSnack(Guid id)
-{
-    try
-    {
-        var snack = await _snackService.GetSnackByIdAsync(id);
-        if (snack == null)
-        {
-            return NotFound(new { error = "Snack not found" });
-        }
-        return Ok(snack);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error getting snack {SnackId}", id);
-        return StatusCode(500, new { error = "Internal server error" });
-    }
-}
-```
+  * `[Table("user_behaviors")]`
+  * `[Column("created_at")]`
+* 禁止依赖默认命名约定
 
 ---
 
-## 8. 测试规范
+## 8. 文件上传规范（安全闭环）
 
-### 8.1 前端测试
+### 8.1 后端处理流程（强制）
 
-```typescript
-// ComponentName.test.tsx
-import { render, screen } from '@testing-library/react';
-import { SnackCard } from './SnackCard';
+1. Controller 接收 `IFormFile`
+2. 校验：
 
-describe('SnackCard', () => {
-  it('should render snack name', () => {
-    const snack = { id: '1', name: 'Test Snack' };
-    render(<SnackCard snack={snack} />);
-    expect(screen.getByText('Test Snack')).toBeInTheDocument();
-  });
-});
-```
+   * 扩展名白名单（`.jpg`, `.png`, `.webp`）
+   * Magic Number 校验（文件头字节）
+3. 处理：
 
-### 8.2 后端测试
+   * ImageSharp resize/压缩（最大 1MB）
+   * 优先转 WebP
+4. 命名：
 
-```csharp
-// SnacksControllerTests.cs
-public class SnacksControllerTests
-{
-    [Fact]
-    public async Task GetSnack_ReturnsOk_WhenSnackExists()
-    {
-        // Arrange
-        var snackId = Guid.NewGuid();
-        
-        // Act
-        var result = await _controller.GetSnack(snackId);
-        
-        // Assert
-        Assert.IsType<OkObjectResult>(result);
-    }
-}
-```
+   * 生成 GUID 文件名（严禁使用用户原始文件名）
+5. 存储：
+
+   * `wwwroot/uploads/images/{yyyy}/{mm}/{guid}.webp`
+6. DB：
+
+   * 仅存相对路径：`/uploads/images/...`
+
+### 8.2 Nginx 托管（推荐）
+
+* `location /uploads/` 直接由 Nginx 静态服务
+* 建议设置正确 MIME 与缓存头：
+
+  * `Cache-Control: public, max-age=31536000, immutable`
 
 ---
 
-## 9. 性能优化规范
+## 9. 错误处理规范
 
-### 9.1 前端性能
+### 9.1 前端
 
-- **懒加载**：使用 `React.lazy()` 和 `Suspense`
-- **图片优化**：使用懒加载和WebP格式
-- **代码分割**：按路由分割代码
-- **Memoization**：使用 `useMemo` 和 `useCallback`
+* UI 层只负责展示错误（toast/banner）
+* 业务错误/状态由 queries 管理（React Query 的 `error`, `isFetching`, `isLoading`）
 
-### 9.2 后端性能
+### 9.2 后端（强制统一）
 
-- **异步操作**：所有I/O操作使用async/await
-- **数据库查询**：使用 `Include()` 避免N+1问题
-- **缓存**：合理使用内存缓存
-- **分页**：列表查询必须分页
+* 默认不在 Controller 写 try-catch
+* 统一由 `ErrorHandlingMiddleware` 输出标准错误响应格式（与 API 规范一致）
+* 仅对“可预期业务错误”抛出自定义异常（如 NotFoundException），由中间件映射为 404
 
 ---
 
-## 10. 安全规范
+## 10. Git 提交规范（Conventional Commits）
 
-### 10.1 前端安全
-
-- **输入验证**：所有用户输入必须验证
-- **XSS防护**：使用React的自动转义
-- **敏感信息**：不在前端存储敏感信息
-- **HTTPS**：生产环境必须使用HTTPS
-
-### 10.2 后端安全
-
-- **输入验证**：使用FluentValidation验证所有输入
-- **SQL注入**：使用参数化查询（EF Core自动处理）
-- **认证授权**：所有API端点必须认证
-- **速率限制**：实现API速率限制
+保持 v1.0 的规范不变（可继续使用）。
 
 ---
 
-## 11. 移动端优化规范
+## 11. 测试规范（与架构一致）
 
-### 11.1 响应式设计
+### 11.1 前端
 
-- **移动端优先**：先设计移动端，再适配桌面端
-- **触摸优化**：按钮最小44px × 44px
-- **性能优化**：首屏加载 < 2秒
+* UI 组件：Testing Library
+* Queries：可通过 MSW/mock service 测试 key/分页/失效逻辑（推荐）
 
-### 11.2 PWA规范
+### 11.2 后端
 
-- **Service Worker**：实现离线缓存
-- **Manifest**：配置PWA清单
-- **图标**：提供多种尺寸的图标
+* Unit：Application Services / EventHandlers（mock Infra）
+* Integration：WebApplicationFactory 全链路（Controller→App→Infra）
 
 ---
 
-**文档版本**: 1.0  
-**创建日期**: 2025-01-27  
+**文档版本**: 1.1
+**创建日期**: 2025-01-27
 **最后更新**: 2025-01-27
+**对齐架构版本**: 文件架构设计文档 V3.0
 
