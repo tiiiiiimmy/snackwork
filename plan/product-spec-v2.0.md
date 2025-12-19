@@ -167,6 +167,49 @@ GET  /api/v1/users/{userId}/snacks       # 获取用户发布的零食
 GET  /api/v1/users/{userId}/reviews       # 获取用户的评价
 ```
 
+#### 2.1.5 用户角色系统
+
+**功能描述**：
+- 系统支持两种用户角色：普通用户和管理员
+- 管理员拥有额外的管理权限
+- 角色由系统管理员分配，普通用户无法自行升级
+
+**角色定义**：
+
+1. **普通用户（User）**
+   - 默认角色，所有注册用户均为普通用户
+   - 拥有普通用户的所有功能权限
+   - 受等级系统限制的功能解锁规则约束
+
+2. **管理员（Admin）**
+   - 由系统超级管理员分配
+   - 拥有所有普通用户权限
+   - 额外拥有以下管理权限：
+     - 管理所有用户（查看、编辑、禁用、删除）
+     - 管理所有零食（编辑、删除、审核）
+     - 管理所有商店（编辑、删除）
+     - 管理所有分类（创建、编辑、删除）
+     - 管理所有评价（查看、删除、审核）
+     - 查看系统统计数据
+     - 管理区域配置
+     - 管理用户解锁区域
+     - 不受等级系统限制，自动解锁所有功能
+
+**业务规则**：
+- 用户角色存储在用户表中，默认为普通用户
+- 管理员角色只能由现有管理员或系统超级管理员分配
+- 管理员数量应严格控制，建议不超过总用户数的1%
+- 管理员操作需要记录审计日志
+- 管理员可以查看所有区域的内容，不受区域解锁限制
+
+**API端点**：
+```
+GET  /api/v1/users/{userId}/role         # 获取用户角色（仅管理员可见）
+PUT  /api/v1/users/{userId}/role         # 更新用户角色（仅管理员）
+GET  /api/v1/admin/users                 # 获取用户列表（管理员）
+GET  /api/v1/admin/stats                  # 获取系统统计（管理员）
+```
+
 ### 2.2 游戏化系统
 
 #### 2.2.1 用户等级系统
@@ -228,22 +271,87 @@ GET /api/v1/leaderboards?type={type}&limit={limit}  # 获取排行榜
 GET /api/v1/leaderboards/my-rank?type={type}         # 获取我的排名
 ```
 
-#### 2.2.3 功能解锁机制
+#### 2.2.3 区域解锁机制
+
+**功能描述**：
+- 奥克兰地区划分为多个区域
+- 用户根据等级解锁不同数量的区域
+- 只能查看和访问已解锁区域的零食和商店
+- 区域解锁是游戏化系统的重要组成部分
+
+**区域划分**：
+- 奥克兰地区划分为多个区域（如：CBD、Ponsonby、Newmarket、Mt Eden等）
+- 每个区域有明确的边界定义（基于地理位置）
+- 商店和零食通过所属区域进行关联
+
+**区域解锁规则**：
+- **等级1**：解锁2个区域
+  - 自动解锁：用户所在区域（根据注册时位置或首次使用位置确定）
+  - 自动解锁：1个相邻区域（系统自动选择距离最近的相邻区域）
+  - 用户只能查看和访问这2个区域的零食和商店
+- **等级3**：解锁3个区域
+  - 在等级1的2个区域基础上，解锁第3个区域
+  - 用户可以选择解锁哪个区域（从剩余未解锁区域中选择）
+- **等级4**：解锁全部区域
+  - 解锁奥克兰所有区域
+  - 用户可以查看和访问所有区域的零食和商店
+  - 获得"全区域探索者"成就
+
+**业务规则**：
+- 新用户注册时，系统根据用户位置自动确定所在区域
+- 如果无法确定位置，默认解锁CBD区域和其相邻区域
+- 区域解锁记录保存在用户解锁区域表中
+- 管理员不受区域限制，可以访问所有区域
+- 用户升级到新等级时，系统自动提示可解锁的新区域
+- 等级3用户解锁第3个区域时，需要用户主动选择
+
+**区域与内容关联**：
+- 每个商店必须关联到一个区域
+- 零食通过所属商店关联到区域
+- 搜索和筛选时，只能显示用户已解锁区域的零食
+- 推荐系统优先推荐用户已解锁区域的内容
+
+**API端点**：
+```
+GET  /api/v1/areas                        # 获取所有区域列表
+GET  /api/v1/areas/{areaId}               # 获取区域详情
+GET  /api/v1/users/{userId}/unlocked-areas # 获取用户已解锁区域
+POST /api/v1/users/{userId}/unlock-area   # 解锁新区域（等级3时）
+GET  /api/v1/users/{userId}/current-area  # 获取用户当前所在区域
+```
+
+#### 2.2.4 功能解锁机制
 
 **功能描述**：
 - 高等级用户解锁高级功能
 - 解锁提示和引导
+- 与区域解锁机制配合，形成完整的游戏化体验
 
 **功能解锁规则**：
-- **等级2+**：可以创建新分类
-- **等级3+**：可以关注其他用户
-- **等级5+**：可以发送私信
+- **等级1**：
+  - 基础功能：查看零食、发布零食、评价零食
+  - 区域限制：只能访问2个区域
+- **等级2+**：可以私信其他用户
+- **等级3+**：
+  - 可以创建新分类
+  - 区域解锁：可以解锁第3个区域
+- **等级4+**：
+  - 区域解锁：解锁全部区域
+  - 获得"全区域探索者"成就
+- **等级5+**：可以发送私信（与等级2功能合并，实际为等级2+）
 - **等级7+**：可以创建商店
-- **等级10**：解锁所有功能，获得特殊标识
+- **等级10**：解锁所有功能，获得特殊标识和"顶级探索者"称号
+
+**管理员特殊权限**：
+- 管理员自动拥有所有功能权限
+- 不受等级系统限制
+- 可以访问所有区域
+- 拥有管理后台访问权限
 
 **API端点**：
 ```
 GET /api/v1/users/{userId}/unlocked-features  # 获取已解锁功能
+GET /api/v1/users/{userId}/unlock-status      # 获取解锁状态（功能+区域）
 ```
 
 ### 2.3 内容管理
@@ -258,18 +366,20 @@ GET /api/v1/users/{userId}/unlocked-features  # 获取已解锁功能
 
 **数据字段**：
 - 名称（必填，最大100字符）
-- 描述（可选，最大500字符）
-- 图片（可选，最多3张）
+- 描述（可选，最大1000字符）
+- 图片（可选，最多5张）
 - 分类（必选）
 - 商店（必选）
 - 价格（可选）
-- 标签（可选，最多5个）
+- 标签（可选，最多99个）
 
 **业务规则**：
-- 只有零食创建者可以编辑/删除
+- 只有零食创建者可以编辑/删除（管理员可以删除任何零食）
 - 删除为软删除，30天后物理删除
 - 图片大小限制：每张最大5MB，压缩后最大1MB
 - 支持图片格式：JPG, PNG, WebP
+- 用户只能查看已解锁区域的零食
+- 搜索和推荐系统只返回用户已解锁区域的零食
 
 **API端点**：
 ```
@@ -283,7 +393,7 @@ DELETE /api/v1/snacks/{id}                 # 删除零食
 #### 2.3.2 商店/商家管理
 
 **功能描述**：
-- 用户可以创建商店信息
+- 高级用户和管理员可以创建商店信息
 - 商店关联到地理位置
 - 显示商店的零食列表
 
@@ -295,10 +405,10 @@ DELETE /api/v1/snacks/{id}                 # 删除零食
 - 描述（可选，最大200字符）
 
 **业务规则**：
-- 等级7+用户可以创建商店
+- 等级7+用户和管理员可以创建商店
 - 商店创建后不可编辑（防止数据混乱）
 - 商店可以软删除（如果没有关联零食）
-- 同一名称可以在不同位置存在（如连锁店）
+- 同一品牌不同位置的商店需要在名称后添加位置标注清晰
 
 **API端点**：
 ```
@@ -553,15 +663,20 @@ CREATE TABLE Users (
     PasswordHash VARCHAR(255) NOT NULL,
     AvatarUrl VARCHAR(500),
     Bio VARCHAR(200),
+    Role VARCHAR(20) DEFAULT 'User' NOT NULL,  -- 'User' or 'Admin'
     Level INT DEFAULT 1 NOT NULL,
     ExperiencePoints INT DEFAULT 0 NOT NULL,
+    CurrentAreaId CHAR(36),  -- 用户当前所在区域
     CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     IsDeleted TINYINT(1) DEFAULT 0 NOT NULL,
+    FOREIGN KEY (CurrentAreaId) REFERENCES Areas(Id),
     INDEX idx_username (Username),
     INDEX idx_email (Email),
+    INDEX idx_role (Role),
     INDEX idx_level (Level),
-    INDEX idx_experience (ExperiencePoints)
+    INDEX idx_experience (ExperiencePoints),
+    INDEX idx_area (CurrentAreaId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
@@ -619,13 +734,16 @@ CREATE TABLE Stores (
     Address VARCHAR(120),
     Latitude DECIMAL(9,6) NOT NULL,
     Longitude DECIMAL(9,6) NOT NULL,
+    AreaId CHAR(36) NOT NULL,  -- 所属区域
     Description VARCHAR(200),
     CreatedByUserId CHAR(36) NOT NULL,
     CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     IsDeleted TINYINT(1) DEFAULT 0 NOT NULL,
     FOREIGN KEY (CreatedByUserId) REFERENCES Users(Id),
+    FOREIGN KEY (AreaId) REFERENCES Areas(Id),
     INDEX idx_location (Latitude, Longitude),
     INDEX idx_name (Name),
+    INDEX idx_area (AreaId),
     FULLTEXT INDEX idx_search (Name, Address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
@@ -798,6 +916,44 @@ CREATE TABLE SnackTags (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
+#### 4.2.15 Areas（区域表）
+
+```sql
+CREATE TABLE Areas (
+    Id CHAR(36) PRIMARY KEY,
+    Name VARCHAR(50) UNIQUE NOT NULL,
+    Description VARCHAR(200),
+    CenterLatitude DECIMAL(9,6) NOT NULL,  -- 区域中心纬度
+    CenterLongitude DECIMAL(9,6) NOT NULL, -- 区域中心经度
+    BoundaryCoordinates JSON,  -- 区域边界坐标（多边形）
+    DisplayOrder INT DEFAULT 0,  -- 显示顺序
+    IsActive TINYINT(1) DEFAULT 1 NOT NULL,
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_name (Name),
+    INDEX idx_location (CenterLatitude, CenterLongitude),
+    INDEX idx_active (IsActive)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+#### 4.2.16 UserUnlockedAreas（用户解锁区域表）
+
+```sql
+CREATE TABLE UserUnlockedAreas (
+    Id CHAR(36) PRIMARY KEY,
+    UserId CHAR(36) NOT NULL,
+    AreaId CHAR(36) NOT NULL,
+    UnlockedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UnlockType VARCHAR(20) NOT NULL,  -- 'auto' or 'manual'
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+    FOREIGN KEY (AreaId) REFERENCES Areas(Id),
+    UNIQUE KEY uk_user_area (UserId, AreaId),
+    INDEX idx_user (UserId),
+    INDEX idx_area (AreaId),
+    INDEX idx_unlocked (UnlockedAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
 ### 4.3 索引设计
 
 **主要索引策略**：
@@ -814,8 +970,11 @@ CREATE TABLE SnackTags (
 - Users 1:N Reviews（一个用户可发表多个评价）
 - Users N:M Follows（用户之间的关注关系）
 - Users 1:N Messages（用户之间的私信）
+- Users N:1 Areas（用户当前所在区域）
+- Users N:M UserUnlockedAreas（用户解锁的区域）
 - Snacks N:1 Categories（多个零食属于一个分类）
 - Snacks N:1 Stores（多个零食属于一个商店）
+- Stores N:1 Areas（商店所属区域）
 - Snacks 1:N Reviews（一个零食有多个评价）
 - Reviews 1:N ReviewLikes（一个评价有多个点赞）
 
@@ -968,11 +1127,15 @@ POST   /auth/logout             # 登出
 #### 6.3.2 用户相关
 
 ```
-GET    /users/{userId}         # 获取用户资料
-PUT    /users/{userId}          # 更新用户资料
-GET    /users/{userId}/snacks   # 获取用户的零食
-GET    /users/{userId}/reviews  # 获取用户的评价
-GET    /users/{userId}/level    # 获取用户等级信息
+GET    /users/{userId}              # 获取用户资料
+PUT    /users/{userId}               # 更新用户资料（仅自己）
+GET    /users/{userId}/snacks        # 获取用户的零食
+GET    /users/{userId}/reviews       # 获取用户的评价
+GET    /users/{userId}/level         # 获取用户等级信息
+GET    /users/{userId}/role          # 获取用户角色（仅管理员可见）
+PUT    /users/{userId}/role          # 更新用户角色（仅管理员）
+GET    /users/{userId}/unlocked-areas # 获取用户已解锁区域
+GET    /users/{userId}/current-area   # 获取用户当前所在区域
 ```
 
 #### 6.3.3 关注相关
@@ -993,12 +1156,12 @@ GET    /feed                      # 获取信息流
 #### 6.3.5 零食相关
 
 ```
-GET    /snacks                    # 获取零食列表
+GET    /snacks?areaId={areaId}    # 获取零食列表（可按区域筛选）
 GET    /snacks/{id}               # 获取零食详情
 POST   /snacks                    # 创建零食
-PUT    /snacks/{id}               # 更新零食
-DELETE /snacks/{id}               # 删除零食
-GET    /snacks/search             # 搜索零食
+PUT    /snacks/{id}               # 更新零食（仅创建者）
+DELETE /snacks/{id}               # 删除零食（仅创建者）
+GET    /snacks/search?q={keyword}&areaId={areaId} # 搜索零食（区域筛选）
 ```
 
 #### 6.3.6 评价相关
@@ -1015,10 +1178,10 @@ DELETE /reviews/{reviewId}/like    # 取消点赞
 #### 6.3.7 商店相关
 
 ```
-GET    /stores                    # 搜索商店
+GET    /stores?search={keyword}&areaId={areaId} # 搜索商店（可按区域筛选）
 GET    /stores/{id}               # 获取商店详情
-POST   /stores                    # 创建商店
-DELETE /stores/{id}               # 删除商店
+POST   /stores                    # 创建商店（等级7+或管理员）
+DELETE /stores/{id}               # 删除商店（仅管理员）
 GET    /stores/{id}/snacks        # 获取商店的零食
 ```
 
@@ -1046,6 +1209,56 @@ GET    /messages/unread-count     # 获取未读消息数
 ```
 GET    /leaderboards              # 获取排行榜
 GET    /leaderboards/my-rank      # 获取我的排名
+```
+
+#### 6.3.11 区域相关
+
+```
+GET    /areas                     # 获取所有区域列表
+GET    /areas/{areaId}            # 获取区域详情
+GET    /areas/{areaId}/stores     # 获取区域内的商店
+GET    /areas/{areaId}/snacks     # 获取区域内的零食
+POST   /users/{userId}/unlock-area # 解锁新区域（等级3时选择）
+```
+
+#### 6.3.12 管理员相关（仅管理员可访问）
+
+```
+# 用户管理
+GET    /admin/users               # 获取用户列表（支持筛选和分页）
+GET    /admin/users/{userId}      # 获取用户详细信息
+PUT    /admin/users/{userId}      # 更新用户信息
+DELETE /admin/users/{userId}      # 删除用户（软删除）
+PUT    /admin/users/{userId}/role # 更新用户角色
+
+# 内容管理
+GET    /admin/snacks              # 获取所有零食（包括已删除）
+PUT    /admin/snacks/{id}         # 编辑任何零食
+DELETE /admin/snacks/{id}         # 删除任何零食
+GET    /admin/stores              # 获取所有商店
+PUT    /admin/stores/{id}         # 编辑任何商店
+DELETE /admin/stores/{id}         # 删除任何商店
+GET    /admin/reviews             # 获取所有评价
+DELETE /admin/reviews/{id}        # 删除任何评价
+
+# 分类管理
+POST   /admin/categories          # 创建分类（不受等级限制）
+PUT    /admin/categories/{id}     # 编辑分类
+DELETE /admin/categories/{id}     # 删除分类
+
+# 区域管理
+GET    /admin/areas               # 获取所有区域（包括非活跃）
+POST   /admin/areas               # 创建区域
+PUT    /admin/areas/{id}          # 更新区域
+DELETE /admin/areas/{id}          # 删除区域
+GET    /admin/areas/{id}/users    # 获取区域内的用户
+PUT    /admin/users/{userId}/unlocked-areas # 管理用户解锁区域
+
+# 系统统计
+GET    /admin/stats               # 获取系统统计数据
+GET    /admin/stats/users         # 用户统计
+GET    /admin/stats/snacks        # 零食统计
+GET    /admin/stats/areas         # 区域统计
 ```
 
 ### 6.4 移动端API优化
