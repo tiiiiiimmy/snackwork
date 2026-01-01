@@ -30,7 +30,7 @@ jobs:
         run: dotnet publish src/backend/SnackSpotAuckland.Api/SnackSpotAuckland.Api.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
