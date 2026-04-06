@@ -60,6 +60,7 @@ public class AuthService(SnackSpotDbContext db, IConfiguration config) : IAuthSe
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
 
         token.IsRevoked = true;
+        await db.SaveChangesAsync();
 
         return await BuildAuthResponse(token.User);
     }
@@ -103,7 +104,9 @@ public class AuthService(SnackSpotDbContext db, IConfiguration config) : IAuthSe
         var secret = config["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
         var issuer = config["Jwt:Issuer"];
         var audience = config["Jwt:Audience"];
-        var expiryMinutes = int.Parse(config["Jwt:AccessTokenExpiryMinutes"]!);
+        var expiryMinutes = int.Parse(
+            config["Jwt:AccessTokenExpiryMinutes"]
+            ?? throw new InvalidOperationException("Jwt:AccessTokenExpiryMinutes is not configured."));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -132,7 +135,9 @@ public class AuthService(SnackSpotDbContext db, IConfiguration config) : IAuthSe
         return new RefreshToken
         {
             Token = Guid.NewGuid().ToString(),
-            ExpiresAt = DateTime.UtcNow.AddDays(int.Parse(config["Jwt:RefreshTokenExpiryDays"]!)),
+            ExpiresAt = DateTime.UtcNow.AddDays(int.Parse(
+                config["Jwt:RefreshTokenExpiryDays"]
+                ?? throw new InvalidOperationException("Jwt:RefreshTokenExpiryDays is not configured."))),
             UserId = user.Id
         };
     }
