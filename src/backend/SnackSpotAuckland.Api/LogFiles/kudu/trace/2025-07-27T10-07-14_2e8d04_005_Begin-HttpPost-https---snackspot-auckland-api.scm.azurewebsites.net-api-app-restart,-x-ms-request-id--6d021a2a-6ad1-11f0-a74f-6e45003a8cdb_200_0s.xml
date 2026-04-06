@@ -1,3 +1,0 @@
-<step title="Begin HttpPost https://snackspot-auckland-api.scm.azurewebsites.net/api/app/restart, x-ms-request-id: 6d021a2a-6ad1-11f0-a74f-6e45003a8cdb" date="2025-07-27T10:07:14.463" instance="2e8d04" >
-  <step title="Cleanup Xml Logs" date="2025-07-27T10:07:14.507" /><!-- duration: 0ms -->
-</step><!-- duration: 59ms -->
