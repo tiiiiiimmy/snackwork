@@ -1,0 +1,27 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.DotSettings.user
+
+## NuGet
+*.nupkg
+*.nuget.props
+*.nuget.targets
+
+## Rider
+.idea/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+LogFiles/
+
+## Secrets
+appsettings.*.json
+!appsettings.Development.json
