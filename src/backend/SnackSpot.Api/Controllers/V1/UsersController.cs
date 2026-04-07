@@ -9,7 +9,7 @@ namespace SnackSpot.Api.Controllers.V1;
 
 [ApiController]
 [Route("api/v1/users")]
-public class UsersController(IUserService userService) : ControllerBase
+public class UsersController(IUserService userService, IGamificationService gamificationService) : ControllerBase
 {
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetUserProfile(Guid userId)
@@ -44,6 +44,20 @@ public class UsersController(IUserService userService) : ControllerBase
         [FromQuery] int pageSize = 20)
     {
         var result = await userService.GetUserReviewsAsync(userId, page, pageSize);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("{userId:guid}/level")]
+    public async Task<IActionResult> GetUserLevel(Guid userId)
+    {
+        var result = await gamificationService.GetUserLevelInfoAsync(userId);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("{userId:guid}/unlocked-features")]
+    public async Task<IActionResult> GetUnlockedFeatures(Guid userId)
+    {
+        var result = await gamificationService.GetUnlockedFeaturesAsync(userId);
         return Ok(ApiResponse<object>.Ok(result));
     }
 }
