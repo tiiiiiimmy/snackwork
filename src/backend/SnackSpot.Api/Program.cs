@@ -128,7 +128,13 @@ var app = builder.Build();
 
 // 1. Auto-migrate on startup
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<SnackSpotDbContext>().Database.Migrate();
+{
+    var db = scope.ServiceProvider.GetRequiredService<SnackSpotDbContext>();
+    if (db.Database.IsRelational())
+        db.Database.Migrate();
+    else
+        db.Database.EnsureCreated();
+}
 
 // 2. ExceptionMiddleware
 app.UseMiddleware<ExceptionMiddleware>();
