@@ -6,7 +6,7 @@ using SnackSpot.Api.Models.Entities;
 
 namespace SnackSpot.Api.Services;
 
-public class SnackService(SnackSpotDbContext db) : ISnackService
+public class SnackService(SnackSpotDbContext db, IGamificationService gamification) : ISnackService
 {
     public async Task<PagedResponse<SnackResponse>> GetSnacksAsync(
         Guid? categoryId, Guid? storeId, string? search, int page, int pageSize)
@@ -85,6 +85,7 @@ public class SnackService(SnackSpotDbContext db) : ISnackService
 
         db.Snacks.Add(snack);
         await db.SaveChangesAsync();
+        await gamification.AwardXpAsync(userId, 50);
 
         // Reload with navigation props for accurate response
         return await GetSnackAsync(snack.Id);

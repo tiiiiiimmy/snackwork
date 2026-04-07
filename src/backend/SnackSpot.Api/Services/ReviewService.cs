@@ -6,7 +6,7 @@ using SnackSpot.Api.Models.Entities;
 
 namespace SnackSpot.Api.Services;
 
-public class ReviewService(SnackSpotDbContext db) : IReviewService
+public class ReviewService(SnackSpotDbContext db, IGamificationService gamification) : IReviewService
 {
     public async Task<PagedResponse<ReviewResponse>> GetReviewsAsync(Guid snackId, int page, int pageSize)
     {
@@ -58,6 +58,7 @@ public class ReviewService(SnackSpotDbContext db) : IReviewService
 
         db.Reviews.Add(review);
         await db.SaveChangesAsync();
+        await gamification.AwardXpAsync(userId, 20);
 
         await RecalculateSnackStatsAsync(snackId);
 
@@ -122,6 +123,9 @@ public class ReviewService(SnackSpotDbContext db) : IReviewService
         }
 
         await db.SaveChangesAsync();
+        if (isLiked)
+            await gamification.AwardXpAsync(review.UserId, 5);
+
         return new LikeResponse { IsLiked = isLiked, LikeCount = review.LikeCount };
     }
 

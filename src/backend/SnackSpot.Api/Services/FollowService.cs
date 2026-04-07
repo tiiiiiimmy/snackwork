@@ -6,7 +6,7 @@ using SnackSpot.Api.Models.Entities;
 
 namespace SnackSpot.Api.Services;
 
-public class FollowService(SnackSpotDbContext db) : IFollowService
+public class FollowService(SnackSpotDbContext db, IGamificationService gamification) : IFollowService
 {
     public async Task<FollowStatusResponse> FollowAsync(Guid followerId, Guid followingId)
     {
@@ -23,6 +23,7 @@ public class FollowService(SnackSpotDbContext db) : IFollowService
 
         db.Follows.Add(new Follow { FollowerId = followerId, FollowingId = followingId });
         await db.SaveChangesAsync();
+        await gamification.AwardXpAsync(followingId, 10);
 
         return await BuildFollowStatusAsync(followerId, followingId);
     }
