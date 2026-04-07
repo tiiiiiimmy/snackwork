@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using SnackSpot.Api.Models.DTOs.Auth;
@@ -10,11 +9,6 @@ public class RegisterTests : IDisposable
 {
     private readonly TestWebAppFactory _factory;
     private readonly HttpClient _client;
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
 
     public RegisterTests()
     {
@@ -28,20 +22,17 @@ public class RegisterTests : IDisposable
         _factory.Dispose();
     }
 
-    private static StringContent JsonContent(object obj) =>
-        new(JsonSerializer.Serialize(obj), System.Text.Encoding.UTF8, "application/json");
-
     [Fact]
     public async Task Register_ValidRequest_Returns200()
     {
         var request = new { Username = "testuser1", Email = "test1@example.com", Password = "Password123" };
 
-        var response = await _client.PostAsync("/api/v1/auth/register", JsonContent(request));
+        var response = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var body = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, JsonOptions);
+        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, TestHelpers.JsonOptions);
 
         result.Should().NotBeNull();
         result!.Success.Should().BeTrue();
@@ -59,13 +50,14 @@ public class RegisterTests : IDisposable
         var request1 = new { Username = "uniqueuser1", Email = "duplicate@example.com", Password = "Password123" };
         var request2 = new { Username = "uniqueuser2", Email = "duplicate@example.com", Password = "Password123" };
 
-        await _client.PostAsync("/api/v1/auth/register", JsonContent(request1));
-        var response = await _client.PostAsync("/api/v1/auth/register", JsonContent(request2));
+        var response1 = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request1));
+        response1.EnsureSuccessStatusCode();
+        var response = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request2));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var body = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, JsonOptions);
+        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, TestHelpers.JsonOptions);
         result!.Success.Should().BeFalse();
     }
 
@@ -75,13 +67,14 @@ public class RegisterTests : IDisposable
         var request1 = new { Username = "sameusername", Email = "email1@example.com", Password = "Password123" };
         var request2 = new { Username = "sameusername", Email = "email2@example.com", Password = "Password123" };
 
-        await _client.PostAsync("/api/v1/auth/register", JsonContent(request1));
-        var response = await _client.PostAsync("/api/v1/auth/register", JsonContent(request2));
+        var response1 = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request1));
+        response1.EnsureSuccessStatusCode();
+        var response = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request2));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var body = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, JsonOptions);
+        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, TestHelpers.JsonOptions);
         result!.Success.Should().BeFalse();
     }
 
@@ -90,9 +83,13 @@ public class RegisterTests : IDisposable
     {
         var request = new { Username = "validuser", Email = "not-an-email", Password = "Password123" };
 
-        var response = await _client.PostAsync("/api/v1/auth/register", JsonContent(request));
+        var response = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, TestHelpers.JsonOptions);
+        result!.Success.Should().BeFalse();
     }
 
     [Fact]
@@ -100,8 +97,12 @@ public class RegisterTests : IDisposable
     {
         var request = new { Username = "validuser2", Email = "valid2@example.com", Password = "short" };
 
-        var response = await _client.PostAsync("/api/v1/auth/register", JsonContent(request));
+        var response = await _client.PostAsync("/api/v1/auth/register", TestHelpers.JsonContent(request));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<ApiResponseWrapper<AuthResponse>>(body, TestHelpers.JsonOptions);
+        result!.Success.Should().BeFalse();
     }
 }
