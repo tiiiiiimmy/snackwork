@@ -62,6 +62,7 @@ builder.Services.AddScoped<IGamificationService, GamificationService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<IFeedService, FeedService>();
 
 var redisConnectionString = config.GetConnectionString("Redis");
