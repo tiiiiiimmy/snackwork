@@ -157,6 +157,52 @@ public class SnackService(SnackSpotDbContext db) : ISnackService
         await db.SaveChangesAsync();
     }
 
+    public async Task<PagedResponse<SnackResponse>> SearchSnacksAsync(
+        string? q, Guid? categoryId, decimal? minPrice, decimal? maxPrice,
+        decimal? minRating, string? sort, int page, int limit)
+    {
+        var query = db.Snacks
+            .Include(s => s.Category)
+            .Include(s => s.Store)
+            .Include(s => s.Images)
+            .Include(s => s.Tags)
+            .Where(s => !s.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(q))
+            query = query.Where(s =>
+                s.Name.Contains(q) ||
+                s.Store.Name.Contains(q) ||
+                s.Tags.Any(t => t.TagName.Contains(q)));
+
+        if (categoryId.HasValue)
+            query = query.Where(s => s.CategoryId == categoryId.Value);
+
+        if (minPrice.HasValue)
+            query = query.Where(s => s.Price >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(s => s.Price <= maxPrice.Value);
+
+        if (minRating.HasValue)
+            query = query.Where(s => s.AverageRating >= minRating.Value);
+
+        IQueryable<Snack> sorted = sort switch
+        {
+            "rating"  => query.OrderByDescending(s => s.AverageRating),
+            "reviews" => query.OrderByDescending(s => s.TotalReviews),
+            _         => query.OrderByDescending(s => s.CreatedAt)
+        };
+
+        var total = await sorted.CountAsync();
+        var items = await sorted
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToListAsync();
+
+        return PagedResponse<SnackResponse>.Create(
+            items.Select(ToResponse).ToList(), page, limit, total);
+    }
+
     private static SnackResponse ToResponse(Snack s) => new()
     {
         Id = s.Id,

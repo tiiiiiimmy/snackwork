@@ -57,4 +57,19 @@ public class SnacksController(ISnackService snackService) : ControllerBase
         await snackService.DeleteSnackAsync(id, userId);
         return Ok(ApiResponse.Ok("Snack deleted."));
     }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchSnacks(
+        [FromQuery] string? q,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
+        [FromQuery] decimal? minRating,
+        [FromQuery] string? sort,
+        [FromQuery] int page = 1,
+        [FromQuery] int limit = 20)
+    {
+        var result = await snackService.SearchSnacksAsync(q, categoryId, minPrice, maxPrice, minRating, sort, page, limit);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
 }
