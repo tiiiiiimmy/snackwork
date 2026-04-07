@@ -92,11 +92,10 @@ public class SnackService(SnackSpotDbContext db) : ISnackService
 
     public async Task<SnackResponse> UpdateSnackAsync(Guid id, UpdateSnackRequest request, Guid userId)
     {
+        // Load without images/tags to avoid navigation-collection tracking conflicts
         var snack = await db.Snacks
             .Include(s => s.Category)
             .Include(s => s.Store)
-            .Include(s => s.Images)
-            .Include(s => s.Tags)
             .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted)
             ?? throw new KeyNotFoundException($"Snack {id} not found.");
 
@@ -125,24 +124,25 @@ public class SnackService(SnackSpotDbContext db) : ISnackService
 
         if (request.ImageUrls is not null)
         {
-            db.SnackImages.RemoveRange(snack.Images);
-            snack.Images.Clear();
+            // Query DbSet directly (avoids navigation-collection tracking issues with InMemory)
+            var oldImages = await db.SnackImages.Where(i => i.SnackId == id).ToListAsync();
+            db.SnackImages.RemoveRange(oldImages);
             for (var i = 0; i < request.ImageUrls.Length; i++)
-                snack.Images.Add(new SnackImage { SnackId = snack.Id, ImageUrl = request.ImageUrls[i], DisplayOrder = i });
+                db.SnackImages.Add(new SnackImage { SnackId = id, ImageUrl = request.ImageUrls[i], DisplayOrder = i });
         }
 
         if (request.Tags is not null)
         {
-            db.SnackTags.RemoveRange(snack.Tags);
-            snack.Tags.Clear();
+            var oldTags = await db.SnackTags.Where(t => t.SnackId == id).ToListAsync();
+            db.SnackTags.RemoveRange(oldTags);
             foreach (var tag in request.Tags)
-                snack.Tags.Add(new SnackTag { SnackId = snack.Id, TagName = tag });
+                db.SnackTags.Add(new SnackTag { SnackId = id, TagName = tag });
         }
 
         snack.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
-        return ToResponse(snack);
+        return await GetSnackAsync(id);
     }
 
     public async Task DeleteSnackAsync(Guid id, Guid userId)

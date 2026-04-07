@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SnackSpot.Api.Common.Middleware;
 using SnackSpot.Api.Data;
+using SnackSpot.Api.Infrastructure.Storage;
 using SnackSpot.Api.Services;
 using SnackSpot.Api.Validators;
 using System.Text;
@@ -53,6 +54,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>()
 
 // 5. Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<ISnackService, SnackService>();
+builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
 
 // 6. CORS
 var allowedOrigins = config.GetSection("AllowedOrigins").Get<string[]>() ?? [];
