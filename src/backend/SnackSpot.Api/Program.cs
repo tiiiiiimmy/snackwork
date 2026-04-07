@@ -59,6 +59,14 @@ builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<ISnackService, SnackService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<IFeedService, FeedService>();
+
+var redisConnectionString = config.GetConnectionString("Redis");
+if (!string.IsNullOrEmpty(redisConnectionString))
+    builder.Services.AddStackExchangeRedisCache(options =>
+        options.Configuration = redisConnectionString);
+else
+    builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
 
 // 6. CORS

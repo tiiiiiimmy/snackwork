@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -48,6 +49,11 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
             var dbName = "TestDb_" + Guid.NewGuid();
             services.AddDbContext<SnackSpotDbContext>(options =>
                 options.UseInMemoryDatabase(dbName));
+
+            // Replace distributed cache with in-memory for tests (no Redis required)
+            var cacheDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IDistributedCache));
+            if (cacheDescriptor is not null) services.Remove(cacheDescriptor);
+            services.AddDistributedMemoryCache();
 
             // Replace R2 with mock so tests don't need real R2 credentials
             var r2Descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IR2StorageService));
