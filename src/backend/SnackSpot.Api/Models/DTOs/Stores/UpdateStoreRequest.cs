@@ -1,0 +1,10 @@
+namespace SnackSpot.Api.Models.DTOs.Stores;
+
+public class UpdateStoreRequest
+{
+    public string? Name { get; set; }
+    public string? Address { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
+    public string? Description { get; set; }
+}
