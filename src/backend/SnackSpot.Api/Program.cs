@@ -60,6 +60,7 @@ builder.Services.AddScoped<ISnackService, SnackService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IFeedService, FeedService>();
 
 var redisConnectionString = config.GetConnectionString("Redis");
